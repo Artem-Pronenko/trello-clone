@@ -9,6 +9,8 @@ class Trello {
 
 	init() {
 		document.querySelectorAll('.column').forEach(this.addNotes.bind(this));
+		document.querySelectorAll('.note').forEach(this.editText.bind(this));
+		document.querySelectorAll('.column-header').forEach(this.editText.bind(this));
 		this.addColumn();
 	}
 
@@ -21,6 +23,7 @@ class Trello {
 			note.setAttribute('data-note-id', this.noteId.toString());
 			this.noteId++;
 			columnEl.querySelector('[data-notes]').append(note);
+			this.editText(note);
 		});
 	}
 
@@ -44,6 +47,16 @@ class Trello {
 			this.addNotes(column);
 		});
 	}
+
+	editText(item) {
+		item.addEventListener('dblclick', () => {
+			item.setAttribute('contenteditable', 'true');
+			item.focus();
+		});
+		item.addEventListener('blur', () => item.removeAttribute('contenteditable'));
+		
+	}
+
 
 }
 
