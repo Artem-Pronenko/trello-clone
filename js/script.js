@@ -54,33 +54,82 @@ class Trello {
 			item.focus();
 		});
 		item.addEventListener('blur', () => item.removeAttribute('contenteditable'));
-		
+		item.addEventListener('dragstart', dragNote.dragstartItem.bind(this));
+		item.addEventListener('dragend', dragNote.dragendItem.bind(this));
+		item.addEventListener('dragenter', dragNote.dragenterItem.bind(this));
+		item.addEventListener('dragover', dragNote.dragoverItem.bind(this));
+		item.addEventListener('dragleave', dragNote.dragleaveItem.bind(this));
+		item.addEventListener('drop', dragNote.dropItem.bind(this));
 	}
 
 
 }
 
-const trello = new Trello({
+
+class DragNote extends Trello {
+	constructor({noteId, columnId}) {
+		super({noteId, columnId});
+		this.draggedElem = null;
+	}
+
+	dragstartItem(event) {
+		this.draggedElem = event.target;
+		event.target.classList.add('dragged')
+	}
+
+	dragendItem(event) {
+		this.draggedElem = null;
+		event.target.classList.remove('dragged')
+	}
+
+	dragenterItem(event) {
+		if (event.target === this.draggedElem) return false;
+		event.target.classList.add('under');
+	}
+
+	dragoverItem(event) {
+		event.preventDefault();
+		if (event.target === this.draggedElem) return false;
+	}
+
+	dragleaveItem(event) {
+		if (event.target === this.draggedElem) return false;
+		event.target.classList.remove('under');
+	}
+
+
+	dropItem(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		const {target} = event;
+		if (target === this.draggedElem) return false;
+		target.classList.remove('under');
+
+		if (target.parentNode === this.draggedElem.parentNode) {
+			const allNote = Array.from(target.parentNode.querySelectorAll(`.${target.className}`));
+			const targetIndex = allNote.indexOf(target);
+			const dragElIndex = allNote.indexOf(this.draggedElem);
+			console.log('targetIndex:', targetIndex);
+			console.log('dragElIndex:', dragElIndex);
+
+			if (dragElIndex > targetIndex) {
+				target.parentNode.insertBefore(this.draggedElem, target)
+			} else if (dragElIndex < targetIndex) {
+				target.parentNode.insertBefore(this.draggedElem, target.nextElementSibling)
+			}
+
+		} else {
+			target.parentNode.insertBefore(this.draggedElem, target);
+		}
+	}
+
+}
+
+
+const dragNote = new DragNote({
 	noteId: 8,
 	columnId: 4
 });
-trello.init();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+dragNote.init();
 
 
